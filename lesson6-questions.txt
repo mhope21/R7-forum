@@ -3,7 +3,12 @@ Questions for Lesson 6
 1. When you enable CRUD operations on a table in the database, you need to add four things
 to your Rails application.  When you generate a scaffold, all four are created.What are they?
 
-
+When you enable CRUD operations on a table in the database, you need to add the migration file,
+the models, the views, and the controllers to the Rails application. The migration file creates the
+table in the database. The model is in charge of getting the data from the database when it is
+requested by the controller. The views are in charge of how the data requested will be displayed to the 
+user. The controller makes requests to the model and directs the data obtained to the view so that it 
+can be displayed.
 
 
 2. When you specify a route in config/routes.rb, you need to include certain information.  What
@@ -11,26 +16,47 @@ must be included? In addition, you may specify an additional parameter to create
 that describes the route.  How do you do that? What variable is created?
 
 
+When you specify a route in config/routes.rb, you need to include an HTTP verb, like GET, POST, PUT,
+or DELETE; a URL path that triggers the route, and a controller action that handles the request. You may specify
+a route with a parameter that you can use in your controller action. This parameter is extracted from
+the URL and made available in the params hash. For example, get '/users/:id', to: 'users#show', as: 'user',
+in which we see the HTTP verb 'get' and the URL pattern, '/users/:id'. This URL pattern has :id as a placeholder
+the captures the value from the URL and makes it available in the controller action as 'params[:id]'.
+So, the users will have a user_id, and the controller will be able to use that id captured from the URL. Then,
+to: 'users#show' shows that the request is handled by the show action in the user_controller.
+
 
 3. What does the Rails db:migrate command do?
 
-
+Migrations modify the database. This command will apply pending changes in order by looking at the timestamp to
+determine which should go first, it executes migration code that creates or alters the database, and updates the schema
+version so that it can keep track of which migrations have already been done.
 
 4. What file do you look at to see the current database schema?
-
+To see the current database schema, you can look at db/schema.rb. This is automatically updated whenever you run
+db:migrate.
 
 5. What command shows the routes?
 
-
+bin/rails routes
 6. How can you start the Rails console? How can you do CRUD operations from the console?
-
+You can start the rails console by typing: bin/rails console. Then, you can create new instances and define 
+the attributes of those instances. Afterward they can be saved, and you can view it by using a method that gets the
+data from the database.
 
 7. What statements are in erb files that make them different from html files?  What are the
 two kinds of special statements, and how are they marked in the erb file? Where are they executed?
 
+erb files contain embedded Ruby blocks that are executed on the server side to generate plain HTML which is sent to the
+browser. Some start with <%, and they are executed but do not result in anything added to the HTML. They are for conditional
+statements and loops. Other blocks start with <%=, and they do generate output.
 
 8. Consider this statement: @forum = Forum.new().  Why is Forum capitalized?  Why is @forum not
 capitalized? Why is the @ used?
+
+Forum is capitalized because it is calling a class method, making a new instance of the Forum class.
+@forum is the instance variable, so it is not capitalized. The instance variable can be accessed by any instance method
+in the class, and it is used to store data that is unique to each instance of a class.
 
 
 
@@ -42,6 +68,9 @@ capitalized? Why is the @ used?
 
 What is the difference between Forum.new() and Forum.create()?  Why can't you do Forum.save(...)?
 
+Forum.new() makes a new instance of forum. Forum.create() is used when you want to create a new instance and save it in one
+step. @forum.save() saves the info about the new instance in the database. You need to do this after Forum.new(). You can't do
+Forum.save, because save is an instance method, not a class method, like new and create. 
 
 10. In the forums controller, you have a method called show:
 
@@ -56,6 +85,9 @@ is a hash called params that is passed to that method.  And, in this case, the p
 hash has a value, params[:id].  What is the value for this element of the hash? How
 did it get there?
 
-
-
+The default behavior is to show the forum instance. I believe it gets its behavior from show.html.erb.
+In this line, <%= render @forum %>. It knows which forum to show because of the params[:id], which tells
+the id of the forum instance to show. The value is an integer. It got there because it was extracted from
+the URL pattern in the request.
+ forum GET    /forums/:id(.:format) forums#show
 
