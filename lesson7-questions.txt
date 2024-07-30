@@ -127,9 +127,15 @@ params hash to the subscriptions controller as a result of this nesting? Which r
 are unaffected by the nesting?
 
 When you nest subscriptions under forums, the routes become hierarchical, meaning the routes for
-subcriptions will include the forum context in their URL structure.
+subcriptions will include the forum context in their URL structure. In this case, the new and create route
+will include the forum_id, but the show, edit, update,and destroy will not because of the shallow: true?
+The index route is unaffected by the nesting because of except: [:index]? This is the relevant code, I believe:
 
-I do not currently have a subscriptions controller, could that be in the next lesson?
+resources :forums do
+    resources :posts, shallow: true, except: [:index]
+    resources :subscriptions, shallow: true, except: [:index]
+  end
+  get '/subscriptions', to: 'subscriptions#index', as: 'subscriptions'
 
 
 10. Every action method must do exactly one of two things -- that is, each
