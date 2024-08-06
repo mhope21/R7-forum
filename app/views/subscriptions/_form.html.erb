@@ -2,6 +2,7 @@
   url = subscription_path(subscription)
   else 
   url = forum_subscriptions_path(subscription.forum)
+  Rails.logger.debug "Subscription.forum = #{subscription.forum.inspect}"
   end %>
 <%= form_with(model: subscription, url: url) do |form| %>
   <% if subscription.errors.any? %>
@@ -21,7 +22,8 @@
   <div>
     <h2><%= "Priority level 1 - 10." %></h2>
     <%= form.label :priority, style: "display: block" %>
-    <%= form.number_field :priority %>
+    <%= form.number_field :priority, min: 1, max: 10 %>
+
   </div>
 
   <div>

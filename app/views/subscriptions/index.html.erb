@@ -8,7 +8,9 @@
   <%= render forum.posts.order(updated_at: :desc) %>
   <%= link_to "Create a new post", new_forum_post_path(forum) %>
 
-  <% subscription = Subscription.find_by(forum_id: forum.id, user_id: @current_user.id) %>
+  <% if @current_user %>
+    <% subscription = Subscription.find_by(forum_id: forum.id, user_id: @current_user.id) %>
+  <% end %>
  
   <% if subscription.present? %>
     <%= link_to "Show this subscription", subscription_path(subscription) %>

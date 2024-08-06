@@ -1,11 +1,13 @@
 class SubscriptionsController < ApplicationController
-  before_action :set_subscription, only: %i[ show edit update destroy ]
   before_action :check_logon
+
+  before_action :set_subscription, only: %i[ show edit update destroy ]
+  
   before_action :set_forum, only: %w[new create]
 
   # GET /subscriptions or /subscriptions.json
   def index
-    # @subscriptions = Subscription.where(user_id: @user.id)
+    @subscriptions = Subscription.where(user_id: @current_user.id).includes(:forum)
     @forums = Forum.joins(:subscriptions).where(subscriptions: {user_id: @current_user.id}).order(:priority)
     
   end
@@ -16,11 +18,11 @@ class SubscriptionsController < ApplicationController
 
   # GET /subscriptions/new
   def new
-    if @forum.subscriptions.where(user_id: @user.id).any?
+    if @forum.subscriptions.where(user_id: @current_user.id).any?
       redirect_to forums_path, notice: "You are already subscribed to that forum." and return
     end
-    @subscription = @user.subscriptions.new # change
-    @subscription.forum = @forum     # change
+    @subscription = @current_user.subscriptions.new(forum: @forum) # change
+    # @subscription.forum = @forum     # change
   end
 
   # GET /subscriptions/1/edit
@@ -29,7 +31,8 @@ class SubscriptionsController < ApplicationController
 
   # POST /subscriptions or /subscriptions.json
   def create
-    @subscription = @user.subscriptions.new(subscription_params) # change
+    @subscription = @current_user.subscriptions.new(subscription_params) # change
+    @subscription.forum = @forum
 
     respond_to do |format|
       if @subscription.save
@@ -83,10 +86,13 @@ class SubscriptionsController < ApplicationController
     end
     
     def set_forum
-      @forum = Forum.find params[:forum_id]
+      @forum = Forum.find(params[:forum_id])
     end    
     
     def set_subscription
-      @subscription = Subscription.find_by(id: params[:id], user_id: @current_user.id)
+      if @current_user
+        @subscription = Subscription.find_by(id: params[:id], user_id: @current_user.id)
+        redirect_to forums_path, notice: "Subscription not found." unless @subscription
+      end
     end
 end
