@@ -79,7 +79,9 @@ new_subscription = user.subscriptions.new
 Try that last line.  You will see that it creates a subscription object, but that
 object is not entirely empty.  Which attribute is set? Where does it get that
 value?
-When you create a new subcription instance, Rails sets the user_id attribute of the new
+When you type user.subscriptions, it returns the object ActiveRecord::Associations::CollectionProxy. This
+object represents the collection of Subscription records associated with the User.
+When you create a new subscription instance, Rails sets the user_id attribute of the new
 subcription object to the id of the user instance, this is because the subscription model
 belongs to a user and Rails associates the new subcription with that specific user.
 
@@ -97,8 +99,14 @@ Active Record Statement could you use to retrieve all the user's posts for that
 forum?  Hint: You need to have a where in your statement. Try this out in the console.
 You will see the SQL that is executed logged to the screen.  What is that SQL?
 
-  SELECT "forums".* FROM "forums" INNER JOIN "subscriptions" ON "forums"."id" = "subscriptions"."forum_id" 
-  WHERE "subscriptions"."user_id" = ?  [["user_id", 1]]
+
+user_posts_in_forum = Post.where(user_id: user.id, forum_id: forum.id)
+
+For example, this SQL returns all the posts made by the user with id 1 from the forum with id 1.
+
+  SELECT "posts".* FROM "posts" WHERE "posts"."user_id" = 1 AND "posts"."forum_id" = 1;
+
+  
 
 8. You have the following method in your posts controller:
 
