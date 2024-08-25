@@ -4,6 +4,9 @@ Questions for Lesson 7
 before some or all of the controller actions execute?  Where can you put that
 change so that it affects all controllers?
 
+We use the before_action method so that something happens before some or all of the controller
+actions execute.  If we want it to affect all controllers, we put it in the super class application_controller,
+and it will execute before any other controller.
 
 
 2. Consider the following statement:
@@ -14,12 +17,19 @@ This creates several files, including two you need to know about.  What are they
 After you do this statement but before starting the rails server, you have to do another
 command.  What is that command?
 
+It creates the migration file that is responsible for the subcriptions table with the specified columns. It also creates the
+model file named subcription.rb. The command I need to run after this is bin/rails db:migrate to update the changes to my 
+database.
 
 
 3. What table is created as a result of the migration described above? What are the column
 names in that table? What is the primary key? What are the foreign keys?  What does a 
 foreign key do?
+The table is subcriptions. The column names are id, which is added automatically by Rails, and it is the primary
+key. Then, there is forum_id, referencing the forums table, user_id, referencing the users table, and priority
+a column that takes integers.
 
+The foreign keys associate each subscription to a particular forum by the forum id and a specific user by the user id.
 
 
 4. You have the following lines in the Subscription model:
@@ -32,7 +42,9 @@ that if you have a @subscription (an instance of Subscription), you have a coupl
 used to refer to associated database methods.  What are those methods?  (Actually there are a few,
 but there are two in particular you should know.)
 
-
+It means that I can do @subcription.user and get the user associated with the subscription, or I could use
+@subcription.forum and get the forum associated with the subscription, I could add forum_name and get the
+name of that forum, etc.
 
 5. You have the following lines in the User model.
 
@@ -43,7 +55,8 @@ has_many :forums, through: :subscriptions
 What are threee important methods that are available to instances of the user model because
 of these lines?
 
-
+Three important methods are user.subcriptions, which lets me get all of a user's subcriptions; user.posts,
+which lets me get all of a user's posts; and user.forums, which lets me see the user's forums.
 
 6. Suppose that user is an instance of the User class. What kind of object is returned by
 user.subcriptions?  Hint: To find out, go into the Rails console for your application.
@@ -66,7 +79,19 @@ new_subscription = user.subscriptions.new
 Try that last line.  You will see that it creates a subscription object, but that
 object is not entirely empty.  Which attribute is set? Where does it get that
 value?
+When you type user.subscriptions, it returns the object ActiveRecord::Associations::CollectionProxy. This
+object represents the collection of Subscription records associated with the User.
+When you create a new subscription instance, Rails sets the user_id attribute of the new
+subcription object to the id of the user instance, this is because the subscription model
+belongs to a user and Rails associates the new subcription with that specific user.
 
+irb(main):016> puts "User ID: #{user.id}"
+User ID: 1
+=> nil
+irb(main):017> puts "Subscription User ID: #{new_subsc
+ription.user_id}"
+Subscription User ID: 1
+=> nil
 
 
 7. Suppose that user is an instance of User, and forum is an instance of Forum.  What
@@ -75,6 +100,11 @@ forum?  Hint: You need to have a where in your statement. Try this out in the co
 You will see the SQL that is executed logged to the screen.  What is that SQL?
 
 
+user_posts_in_forum = Post.where(user_id: user.id, forum_id: forum.id)
+
+For example, this SQL returns all the posts made by the user with id 1 from the forum with id 1.
+
+  SELECT "posts".* FROM "posts" WHERE "posts"."user_id" = 1 AND "posts"."forum_id" = 1;
 
 8. You have the following method in your posts controller:
 
@@ -87,6 +117,14 @@ You will see the SQL that is executed logged to the screen.  What is that SQL?
 There is a security exposure, a risk that a hacker could do damage.  What is that
 risk? What two things are done in your code to prevent the risk?
 
+The risk is that someone could delete a post that was created by someone else. That should not
+be allowed. The code should check if the person is logged on and if it is their post before they
+are allowed to delete it.
+I think this is the relevant code:
+before_action :set_post, only: %w[show edit update destroy]
+  before_action :check_access, only: %w[edit update delete]
+Any idea why one says destroy and one says delete, even though I have no method called delete?
+It also sets the post on destroy to make sure you are deleting the right one, correct?
 
 
 9. The routes for subscriptions are nested under the forum routes.  How does this
@@ -94,7 +132,16 @@ change the routes?  What is the additional hash key and value that is passed in 
 params hash to the subscriptions controller as a result of this nesting? Which routes
 are unaffected by the nesting?
 
+When you nest subscriptions under forums, the routes become hierarchical, meaning the routes for
+subcriptions will include the forum context in their URL structure. In this case, the new and create route
+will include the forum_id, but the show, edit, update,and destroy will not because of the shallow: true?
+The index route is unaffected by the nesting because of except: [:index]? This is the relevant code, I believe:
 
+resources :forums do
+    resources :posts, shallow: true, except: [:index]
+    resources :subscriptions, shallow: true, except: [:index]
+  end
+  get '/subscriptions', to: 'subscriptions#index', as: 'subscriptions'
 
 
 10. Every action method must do exactly one of two things -- that is, each
@@ -102,4 +149,5 @@ method may do all sorts of logic, but at the end, it has to do one of two
 things, depending on the outcome of the logic.  What are those two things?
 
 
-
+Each action must render a view (presents new content) or redirect to another action (navigates to another
+part of the application).
