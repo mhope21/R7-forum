@@ -7,7 +7,7 @@ class SubscriptionsController < ApplicationController
 
   # GET /subscriptions or /subscriptions.json
   def index
-    @subscriptions = Subscription.where(user_id: @current_user.id).includes(:forum)
+    # @subscriptions = Subscription.where(user_id: @current_user.id).includes(:forum)
     @forums = Forum.joins(:subscriptions).where(subscriptions: {user_id: @current_user.id}).order(:priority)
     
   end
