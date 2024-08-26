@@ -1,10 +1,11 @@
 Rails.application.routes.draw do
-  get 'posts/create'
-  get 'posts/new'
-  get 'posts/edit'
-  get 'posts/show'
-  get 'posts/update'
-  get 'posts/destroy'
+  # resources :subscriptions
+  # get 'posts/create'
+  # get 'posts/new'
+  # get 'posts/edit'
+  # get 'posts/show'
+  # get 'posts/update'
+  # get 'posts/destroy'
   # resources :users
   root 'forums#index'
   post '/users/:id/logon', to: 'users#logon', as: 'user_logon'
@@ -15,7 +16,7 @@ Rails.application.routes.draw do
   post '/users', to: 'users#create'
   patch '/users/:id', to: 'users#update'
   delete '/users/logoff', to: 'users#logoff', as: 'user_logoff'
-  delete '/users/:id', to: 'users#delete'
+  delete '/users/:id', to: 'users#destroy'
 
   
   resources :forums do
