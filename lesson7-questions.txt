@@ -106,7 +106,6 @@ For example, this SQL returns all the posts made by the user with id 1 from the 
 
   SELECT "posts".* FROM "posts" WHERE "posts"."user_id" = 1 AND "posts"."forum_id" = 1;
 
-  
 
 8. You have the following method in your posts controller:
 
